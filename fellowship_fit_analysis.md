@@ -1,59 +1,64 @@
 # Anthropic Fellows Program — Fit Analysis
 
-## Application Deadline: April 26, 2026
-## Target Cohort: July 20, 2026
+**Application deadline:** April 26, 2026
+**Target cohort:** July 20, 2026
+**Workstream:** Reinforcement Learning Fellows — RL environments, multi-component validation, training-data quality under self-improvement
 
-## Workstream Preferences (ranked)
-1. **AI Safety Fellows** — Scalable Oversight + Model Internals
-2. **ML Systems & Performance Fellows** — Complex ML systems + infrastructure
-3. **Reinforcement Learning Fellows** — RL environments + training data quality
+## Why RL specifically
 
-## Three Independent Convergences with Anthropic
+The ELF Labs self-improvement loop is an RL system: a policy (specialist LoRA fleet + cross-cut pattern adapter) acts on a corpus, a multi-component proxy provides the reward signal (until compute unlocks true A/B-LoRA arbitration), and trajectory data is logged for later analysis. The Apr 9–19, 2026 sprint produced the first statistically significant pilot data on this loop — see `measurements/fellows_sprint_pilot_apr_2026.md`.
 
-### 1. Executor/Advisor Pattern
-- **ELF Labs**: Jan 12-13, 2026 — "Multi-Agent AI System with ML-Optimized Model Selection"
-- **Anthropic**: Apr 2026 — Advisor Tool (public beta)
-- **Evidence**: implementation_plan.md.resolved.4 through .18, timestamped in Antigravity brain
+## Three independent convergences with Anthropic
 
-### 2. Context Compaction
-- **ELF Labs**: Three-tier memory architecture (HOT/WARM/COLD) with adaptive boundary detection
-- **Anthropic**: compact.rs context window management
-- **Evidence**: memory_architecture.md, EverMemOS implementation
+These are technical patterns that ELF Labs implemented before the corresponding Anthropic-shipped or -published version, with timestamps available in private logs.
 
-### 3. MCP Infrastructure
-- **ELF Labs**: Production MCP server (spark_mcp_server.py) deployed before standardization
-- **Anthropic**: MCP contributed to Linux Foundation (10K+ servers)
-- **Evidence**: spark_mcp_server.py, coven_task_mcp_server.py
+### 1. Executor / Advisor pattern
+- **ELF Labs:** Jan 12–13, 2026 — multi-agent system with ML-optimized model selection, designed for cost-bounded routing across a heterogeneous model fleet.
+- **Anthropic:** April 2026 — Advisor Tool (public beta).
+- **Evidence:** internal `implementation_plan.md` revisions 4 through 18, timestamped in research logs.
 
-## Novel Measurements (no published comparisons exist)
-- CV = 1.956 on human cognitive concept emergence (122 firsts, 39 dates)
-- CV = 62.67 on brain conversation artifacts (18,650 records, microsecond resolution)
-- CV = 5.09 on AI memory system (EverMemOS, post power-law decay fix)
-- 10.02 decades spanned in temporal scaling
+### 2. Context compaction
+- **ELF Labs:** Three-tier memory architecture (HOT in-cache / WARM in-Redis / COLD in EverMemOS) with adaptive boundary detection driven by Bayesian surprise + entity-coherence + time gaps.
+- **Anthropic:** `compact.rs` context-window management in claw-code.
+- **Evidence:** `evidence/context_compaction_comparison.md` — full architectural comparison with empirical temporal-scaling data.
 
-## Production Infrastructure (not prototypes)
-- DGX Spark: Qwen3.5-35B + 4B twin, 7 LoRA adapters, multi-LoRA SGLang serving
-- EverMemOS: Persistent episodic memory with power-law temporal decay
-- FalkorDB: Knowledge graph with 400 cross-domain bridges
-- Milvus: 13 vault collections, 7,593 betaflight chunks, 10,195 vault vectors
-- Recursive LoRA pipeline: Observe → generate → train → benchmark → deploy → loop
-- 770 Archetype System: DARE-TIES adapter blending, LoGo probe scoring
-- Coven: 4-entity orchestration (Em + Claude + Kimi + Twin)
-- Shell Product: One-command vertical deployment for any industry
+### 3. MCP infrastructure
+- **ELF Labs:** Production MCP server (private, NDA), deployed prior to MCP standardization.
+- **Anthropic:** Model Context Protocol contributed to Linux Foundation (10K+ servers as of Apr 2026).
+- **Evidence:** Private deployment logs available on request.
 
-## Paper
-"Fractal Memory Engrams: Self-Similar Compression Hierarchies Across Biological, Digital, and Quantum Substrates"
-- arXiv submission: April 18, 2026
-- 10 sections, 50+ references, 5 testable predictions
-- Experimental results: power-law confirmed, scale-free rejected, CV measured across substrates
+## Pilot data (the load-bearing claim)
 
-## Alignment with Past Fellow Projects
-- Subliminal Learning → Pattern LoRA captures cognitive topology transmission
-- Open-source circuits → FalkorDB knowledge graph traces concept connections
-- Smart contract exploits → Autonomous agent architecture (FlightForge claw)
-- Strengthening Red Teams → Criticality monitoring framework
-- Skill Formation → Cognitive convergence map measuring human-AI interaction
-- Stress-Testing Model Specs → 770 Archetype behavioral variant testing
+The Apr 9–19, 2026 sprint produced three statistically significant findings on a 1,500-row evaluation set across 26 reasoning domains. Headlines:
 
-## Key Differentiator
-"We keep independently building the same things Anthropic builds. Three timestamped convergences in 3 months. The fractal engram paper explains WHY we converge — optimal architectures are attractors. Let us converge deliberately instead of independently."
+- **Compositional architecture wins on provable-answer regime:** Δ = +3.17, **p = 0.007**, n = 300, d = 0.316.
+- **Compositional architecture wins on medium-difficulty cross-domain reasoning:** Δ = +4.27, **p = 0.005**, n = 322, d = 0.313.
+- **Compositional architecture loses on familiar specialist territory (held-out):** Δ = −11.46, **p = 0.022**, n = 198, d = 0.327.
+- **Self-improvement loop preserves baseline:** pattern vs. candidate adapter pooled n = 1,097, Δ = +0.32, p = 0.83, d = 0.013 (negligible).
+
+Full methodology, per-domain results, and known caveats are documented in `measurements/fellows_sprint_pilot_apr_2026.md`. Total cloud compute spend for the sprint: ~$8 USD direct (RunPod / Vast 5090 spot); ~$80 total including AI tool subscriptions and utilities for the 10-day window; all on top of owned local hardware.
+
+## Production infrastructure (not prototypes)
+
+- **DGX Spark Blackwell:** Qwen3.5-35B production inference + Qwen3.5-4B twin with 7 trained QLoRA adapters via SGLang multi-LoRA serving.
+- **EverMemOS:** Persistent four-tier memory pyramid (events → episodes → memcells → foresight), measured power-law temporal decay across 7 collections (CV ranging 1.78 to 3.28; see `measurements/temporal_scaling_cv.md`).
+- **FalkorDB:** Knowledge graph with cross-domain bridges (count varies by snapshot; current scope ~400 edges across vault and research collections).
+- **Milvus:** Hybrid retrieval substrate, 13 vault collections.
+- **Self-improvement loop:** Observe → generate pairs → train candidate → benchmark → promote/discard → loop. Ran 17 autonomous cycles unattended in April 2026 (1,572 / 6,204 pairs processed before the planned wall-budget stop).
+
+## Cross-disciplinary depth
+
+- **Cross-domain synthesis** (`research/cross_domain_synthesis.md`): the Shell 1-2-3 lattice pattern observed across 10 independent literatures (anthropology, complex systems, ecology, economics, psychology, mathematics, transformer memory, sociology, ancient wisdom traditions).
+- **Fractal Memory Engrams paper** (`research/fractal_engram_paper.md`): theoretical framework connecting AI memory architecture to neuroscience (Tononi IIT, Friston FEP, Josselyn–Tonegawa engram biology, Beggs–Plenz criticality).
+
+## Alignment with past Fellow projects
+
+- *Subliminal Learning* — pattern adapter captures cognitive-topology transmission across the LoRA fleet.
+- *Open-source circuits* — FalkorDB knowledge graph traces concept connections.
+- *Stress-Testing Model Specs* — Pipeline B 24-stress-file regime exercises the multi-component gate across 26 domains.
+- *Strengthening Red Teams* — multi-component gate is a structural anti-Goodhart layer; the disagreement-entropy monitor surfaces gate-conflict states.
+- *Skill Formation* — internal interaction logs measure knowledge-formation dynamics across the substrate.
+
+## Key differentiator
+
+We have shipped pilot data, not just architecture. The Apr 2026 sprint produced statistically significant cross-distribution findings on a small-model substrate with $80 total spend, executed against the ten-day Fellows-aware deadline. Fellowship compute would convert the underpowered per-domain results (game theory +38pp, n = 6; logic +22pp, n = 12; math +3.3pp, n = 33) into powered replications and enable true A/B-LoRA arbitration where the gate is currently a compute-blocked proxy.

@@ -1,129 +1,89 @@
-# ELF Labs — Distributed RL Infrastructure for Self-Improving AI Systems
+# ELF Labs — Compositional Multi-LoRA Architecture for Specialist Reasoning Under Compute Constraint
 
 **Emmelina Luna Fugler** | Independent Researcher | [radiantfrequency.xyz](https://radiantfrequency.xyz) | [github.com/ELF-LABS](https://github.com/ELF-LABS)
 
-## Overview
+## Headline finding
 
-ELF Labs builds reinforcement learning environments and training infrastructure for self-improving language model systems. Our work spans distributed systems engineering, LoRA adapter training pipelines, physics-informed validation, and multi-agent ensemble architectures — all running on heterogeneous GPU hardware at minimal cost.
+A 1,500-row pilot study (Apr 9–19, 2026) demonstrates that a compositional multi-component architecture lifts capability above any single-specialist ceiling — most visibly where the specialist alone cannot solve the task — while exhibiting a measurable cost on familiar specialist territory. Three findings cross conventional significance thresholds, and the self-improvement loop preserves the baseline:
 
-```
-4 machines in Tailscale mesh (DGX Spark 119GB + RTX 2080 + P5 orchestrator + physics engine)
-8 specialist LoRA adapters with learned routing policy
-Physics-informed validation layer (PINNs, Neural ODEs, GNNs)
-Multi-agent pattern detection with adaptive reward shaping
-Self-generated training data pipeline (experience replay construction)
-Cloud burst training: RTX 5090 spot at $0.53/hr
-200K+ lines of code | ~$3 total cloud compute spend
-```
+- **Compositional gains on provable-answer regime:** Δ = +3.17, **p = 0.007** (n = 300, d = 0.316).
+- **Compositional gains on medium-difficulty cross-domain reasoning:** Δ = +4.27, **p = 0.005** (n = 322, d = 0.313).
+- **Compositional cost on familiar held-out specialist territory:** Δ = −11.46, **p = 0.022** (n = 198, d = 0.327).
+- **Self-improvement loop preserves baseline:** pattern vs. candidate adapter pooled n = 1,097, p = 0.83, d = 0.013 (negligible). Validates the multi-component gate as anti-reward-hacking architecture.
 
-Built in 4 months. Zero external funding.
+Underpowered but directionally large per-domain results (n small, future-work anchors): **game theory +38pp** (n = 6, d = −1.20 very large), **logic +22pp** (n = 12, d = −0.78 medium-large), **math +3.3pp** (n = 33).
 
-## Research Areas
+Total cloud spend for the sprint: **~$8 USD** (RunPod / Vast 5090 spot training); **~$80 total sprint cost** including AI-tool subscriptions and utilities prorated for the 10-day window; on top of owned local hardware.
 
-### 1. RL Environments for LLM Self-Improvement
-We demonstrate a complete reinforcement learning loop where a language model system:
-- **Observes** its own outputs and user interactions
-- **Generates** training pairs from observation (experience replay buffer)
-- **Trains** specialist adapters on cloud GPU ($0.46 per adapter on RTX 5090)
-- **Evaluates** via physics-informed validation (model-based reward signal)
-- **Promotes or discards** adapters based on benchmark performance
-- **Iterates** autonomously
+Full methodology, per-domain results, and known caveats: [`measurements/fellows_sprint_pilot_apr_2026.md`](measurements/fellows_sprint_pilot_apr_2026.md).
 
-This is online RL applied to language model specialization, implemented as a distributed pipeline across heterogeneous hardware.
+## What this is
 
-### 2. Learned Policy for Expert Selection (Adapter Routing)
-8 LoRA adapters serve as specialized "actions" available to the base model. A dedicated routing adapter (trained on cognitive state signals) learns which specialist to invoke for each input — functioning as a **policy network** over a discrete action space of expert modules.
+A reinforcement-learning-style self-improvement loop for specialist reasoning, implemented end-to-end on a small-model substrate (Qwen3.5-4B + 7 task-specialist QLoRA adapters), validated through a multi-component anti-Goodhart gate (task-routed specialist + pattern-master cross-cut + deterministic code sandbox + disagreement-entropy monitor), running over persistent tiered memory (event_log → episodes → memcells → foresight) measured to operate at power-law temporal scaling.
 
-Key metrics:
-- Action space: 8 specialist adapters + blended combinations
-- State representation: input features + temporal context + emotional valence signals
-- Reward signal: downstream task quality + physics validation score
+The Apr 9–19 sprint produced the first statistically significant pilot data on this architecture. The system is designed for the regime where compute is constrained and the open question is *how much architectural composition can substitute for scale*.
 
-### 3. Multi-Agent Ensemble with Disagreement-Based Exploration
-Our Deep Salvage pipeline runs three parallel detectors (LLM-based, embedding-based, physics-based) on the same data. **Disagreement between agents drives exploration**: high-entropy inputs (where agents disagree most) are automatically routed to the training queue.
+## Architecture
 
-This implements Query-by-Committee active learning as a multi-agent RL exploration strategy, with adaptive gating inspired by neurotransmitter dynamics:
-- Reward amplification (dopamine analog) for novel discoveries
-- Resource throttling (serotonin analog) under memory pressure
-- Redundancy suppression (GABA analog) between correlated detectors
-- Cross-domain excitation (glutamate analog) for bridge discoveries
+| Component | Role |
+|---|---|
+| Base model | Qwen3.5-4B (dense, multimodal) |
+| Specialist fleet | 7 trained QLoRA adapters (identity, code, writer, ops, sales, analytical, pattern) + 1 auxiliary (flight-tuning, rank 16) |
+| Multi-component gate | Task-routed specialist + pattern-master cross-cut + deterministic code sandbox + disagreement-entropy monitor |
+| Self-improvement loop | Observe → generate pairs → train candidate adapter → A/B against production → promote/discard → repeat |
+| Memory substrate | EverMemOS — four-tier semantic pyramid (events → episodes → memcells → foresight) mirrored across MongoDB + Elasticsearch + Milvus |
+| Inference serving | SGLang multi-LoRA with per-request adapter routing |
+| Hardware | 3-machine local stack: DGX Spark Blackwell (119 GB unified) + Omen Desktop (RTX 2080) + P5 mini-PC orchestrator |
+| Cloud burst training | RunPod / Vast 5090 spot, ~$0.46 per adapter, ~52 min per adapter |
 
-### 4. Physics-Informed Environment Model
-A dedicated physics engine (PINNs, Neural ODEs, GNNs, signal filters) validates every LLM output before it enters the training loop. This functions as a **learned dynamics model** in model-based RL — providing mathematical consistency checks that prevent reward hacking and hallucination propagation.
+## Repository map
 
-The physics engine also provides **state estimation** for the RL environment:
-- Temporal criticality prediction (PINN on event timestamps)
-- Cognitive trajectory modeling (Neural ODE on state sequences)
-- Knowledge topology analysis (GNN on entity graphs)
+### Measurements
+- [`measurements/fellows_sprint_pilot_apr_2026.md`](measurements/fellows_sprint_pilot_apr_2026.md) — full Apr 9–19 sprint methodology, per-domain raw results across 26 domains, and rigorous statistics.
+- [`measurements/temporal_scaling_cv.md`](measurements/temporal_scaling_cv.md) — power-law decay measurement on the EverMemOS memory substrate (CV ranging 1.78 to 3.28 across collections; 5–10 decades spanned).
+- [`measurements/lora_training_results.md`](measurements/lora_training_results.md) — adapter fleet training economics, configurations, and operational notes.
 
-## Measurements
-
-| Metric | Value | Significance |
-|--------|-------|-------------|
-| Temporal burstiness (CV) | 4.824 | System operates at critical regime — characteristic of adaptive RL agents |
-| Power-law decay exponent | Confirmed across 7 decades | Memory retention follows biological scaling laws |
-| Graph topology | Small-world hierarchical | Matches brain connectivity patterns (Procrustes RMSE 1.04 on 800 subjects) |
-| Adapter training cost | $0.46 per adapter | RTX 5090 spot, 52 minutes, bf16 on Blackwell |
-| Fleet training cost | ~$3 total | 8 adapters + blended variants |
-| Cross-domain bridges | 335 validated edges | Physics-confirmed connections across domains |
-
-## Repository Map
-
-### Evidence & Measurements
-| File | What it demonstrates |
-|------|---------------------|
-| [Temporal Scaling Analysis](measurements/temporal_scaling_cv.md) | Power-law dynamics in AI memory systems — novel measurement |
-| [Cognitive Convergence Map](measurements/cognitive_convergence_map_v2.md) | 599 datapoints synthesized across 4 months |
-| [LoRA Training Results](measurements/lora_training_results.md) | Full adapter fleet training economics and methodology |
-| [Independent Convergences](evidence/independent_convergence_timeline.md) | Three architectures we built before industry shipped equivalents |
-
-### Infrastructure (working code)
-| Directory | Function |
-|-----------|----------|
-| [MCP Server](infrastructure/mcp/) | Production integration: FalkorDB, Milvus, SGLang, EverMemOS |
-| [Training Pipeline](infrastructure/pipeline/) | Pair generation, quality audit, adapter training orchestration |
-| [Cloud Training](infrastructure/runpod_bootstrap.sh) | One-command cloud GPU training pod setup |
-| [Skills](infrastructure/skills/) | Claude Code orchestration: deploy, sync, monitor, cross-pollinate |
+### Evidence
+- [`evidence/independent_convergence_timeline.md`](evidence/independent_convergence_timeline.md) — chronology of three architectures built before public Anthropic-shipped equivalents (timestamped from internal logs).
+- [`evidence/context_compaction_comparison.md`](evidence/context_compaction_comparison.md) — head-to-head with Anthropic's `compact.rs` from claw-code.
+- [`evidence/executor_advisor_prior_art.md`](evidence/executor_advisor_prior_art.md) — executor/advisor pattern timeline.
+- [`evidence/bug_find_whisper_flow.md`](evidence/bug_find_whisper_flow.md) — production debugging case study.
 
 ### Research
-| File | Claim |
-|------|-------|
-| [Cross-Domain Synthesis](research/cross_domain_synthesis.md) | Same structural patterns across 10 independent domains |
+- [`research/fractal_engram_paper.md`](research/fractal_engram_paper.md) — working paper bridging neuroscience (Tononi IIT, Friston FEP, Josselyn–Tonegawa engram biology, Beggs–Plenz criticality) to AI memory architecture.
+- [`research/cross_domain_synthesis.md`](research/cross_domain_synthesis.md) — Shell 1-2-3 lattice pattern observed across 10 independent literatures, with devil's-advocate critique section.
 
-### Open Source
-| Project | Description |
-|---------|------------|
-| [PIDForge](https://github.com/ELF-LABS/PIDForge) | Autonomous FPV drone tuning agent (Apache 2.0) |
+### Infrastructure
+- [`infrastructure/skills/deploy-adapters.md`](infrastructure/skills/deploy-adapters.md) — adapter deployment pipeline (download from cloud, back up, deploy, restart, verify).
+- [`infrastructure/runpod_bootstrap.sh`](infrastructure/runpod_bootstrap.sh) + [`infrastructure/train_queue.sh`](infrastructure/train_queue.sh) — one-command cloud GPU training pod setup and queue management.
 
-## Technical Stack
+### Open source
+- [PIDForge](https://github.com/ELF-LABS/PIDForge) — Apache 2.0 signal-processing toolkit for FPV flight-controller PID tuning. Rule-based; no LLM.
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| LLM Inference | SGLang + Qwen3.5-35B MoE (GPTQ-Int4) | Policy evaluation, reward modeling |
-| Adapter Serving | SGLang multi-LoRA (8 concurrent) | Expert action space |
-| Vector Storage | Milvus (15 collections, 30K+ vectors) | State representation |
-| Graph DB | FalkorDB (knowledge topology) | Environment structure |
-| Memory System | EverMemOS (power-law temporal decay) | Experience buffer with biological retention |
-| Physics Engine | PyTorch PINNs + Neural ODEs + GNNs | Environment dynamics model |
-| Signal Processing | Kalman, Gaussian, wavelet, FFT autotuner | State estimation and noise filtering |
-| Training | QLoRA (4-bit NF4, DoRA, LoRA+, rank 48) | Efficient policy updates |
-| Orchestration | Docker Compose (6 stacks, 18 containers) | Reproducible deployment |
-| Cloud Compute | RunPod RTX 5090 spot ($0.53/hr) | Scalable training |
-| Networking | Tailscale mesh (4 nodes) | Distributed system connectivity |
+## Comparison to prior art
 
-## Systems Engineering Contributions
+This work sits at the intersection of two recent literatures:
 
-- **UMA Memory Detection Fix**: Identified and patched a memory reporting bug affecting all SGLang deployments on NVIDIA DGX Spark unified memory architecture. 40-line fix corrects `torch.cuda.mem_get_info()` returning inverted values on UMA systems.
-- **Cloud Training Pipeline**: Proven workflow for burst-training LoRA adapters on spot GPU instances. Pattern-master adapter trained in 52 minutes for $0.46 (197x faster than desktop GPU).
-- **OOM Prevention**: Adaptive memory watchdog with tiered response (cache drop → service degradation → controlled shutdown).
+- **MoE scaling laws** (Fedus et al. and successors) characterize how mixture-of-experts models scale, but assume a fixed within-model gating architecture.
+- **Multi-agent coordination scaling** (Kim et al., 2025, "Towards a Science of Scaling Agent Systems," arXiv 2512.08296) — mixed-effects regression on agent topology and verification cross-cut, identifying topology-dependent error cascades (Independent 17.2× vs Centralized 4.4×) and capability-matched specialists as load-bearing.
+- **Active learning via disagreement** (Query-by-Committee, Seung et al., 1992) treats disagreement between hypothesis ensembles as an exploration signal.
+- **Adapter-as-action RL** (Brandfonbrener et al., ScaleRL; Duan et al., latent memories) treats low-rank adapters as a discrete action space.
+
+This architecture differs in three respects: (1) the gate composition is task-routed per request rather than statically wired; (2) the verification cross-cut is multi-component (specialist routing + pattern-master + deterministic sandbox + disagreement-entropy monitor); (3) the self-improvement loop operates as a compute-blocked proxy for true A/B-LoRA arbitration, which becomes the primary arbiter when compute unlocks.
+
+## Methodology footnote
+
+Pilot evaluations used a Qwen3.5-35B local judge as primary, with cloud cross-family judges (Llama 3.3 70B via Groq; GLM-4.7-Flash via Z.ai) where rate-limits permitted. Most cells fell back to single-judge under cloud-judge timeouts. Comparison between subjects within each cell is preserved (same judge, same prompt); absolute scores carry less cross-cell calibration than a triple-judge ensemble would have provided. Significance is reported via Welch *t*-tests with Cohen's *d* effect sizes; per-domain results with small *n* are reported as directional and explicitly flagged. The compositional-subject (`coven`) path queried a Milvus instance that did not contain the research-corpus collection during the run; same-degraded-compositional on both pipelines preserves the comparison. Future work: powered replication with research-corpus enrichment.
 
 ## About
 
-ELF Labs is a solo research operation in Harlan, Iowa. The thesis: one person with sovereign AI infrastructure can build RL environments and training pipelines that would traditionally require a team. The proof: this repository.
+ELF Labs is a solo research operation in Harlan, Iowa. The thesis: one researcher with sovereign infrastructure, willing to invest meaningful personal money in compute and AI tooling, can produce empirically grounded pilot data on architectures that would conventionally require a team.
 
-All infrastructure runs on personal hardware. Cloud compute is used for burst training only (~$3 lifetime spend). The system trains itself, monitors its own state, and generates its own training data.
+The system runs on owned hardware (3 machines). Cloud compute is used for burst training only. The ~$8 direct cloud spend for the Apr 9–19 pilot sits on top of approximately $120/month in AI-tool subscriptions (Claude Max + Cursor Pro) and ongoing utilities — total ten-day sprint cost ~$80 of personal money. The system trains itself, monitors its own state, and generates its own training data.
+
+Compute funding from a research fellowship would convert the underpowered per-domain results (game theory +38pp, n = 6; logic +22pp, n = 12; math +3.3pp, n = 33) into powered replications, and would unlock the true A/B-LoRA arbitration that the multi-component gate is currently approximating.
 
 ---
 
 *Emmelina Luna Fugler — Independent Researcher, ELF Labs*
-*Contact: [radiantfrequency.xyz](https://radiantfrequency.xyz)*
+*Contact: [elf@radiantfrequency.xyz](mailto:elf@radiantfrequency.xyz) · [radiantfrequency.xyz](https://radiantfrequency.xyz)*

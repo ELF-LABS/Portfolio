@@ -23,7 +23,7 @@
 
 ## Cloud Training Economics
 
-| GPU | Cost/hr | Pattern LoRA (5K pairs) | All 8 adapters |
+| GPU | Cost/hr | Pattern LoRA (5K pairs) | Full fleet (7 specialists + 1 auxiliary) |
 |-----|---------|------------------------|----------------|
 | RTX 2080 (Omen) | electricity only | ~85 hours | ~240 hours |
 | RTX A4000 (RunPod) | $0.25 | ~10 hours | ~28 hours |
@@ -41,4 +41,4 @@ Total cloud cost for full fleet retrain: **~$5-8 on A6000**
 ## Deployment
 - SGLang multi-LoRA: `--enable-lora --lora-paths identity=/path code=/path ...`
 - Per-request routing via `model` field in OpenAI-compatible API
-- Max 8 LoRAs loaded simultaneously in ~1.2GB VRAM
+- Max 8 LoRAs loaded simultaneously in ~1.2GB VRAM (7 task specialists + 1 auxiliary in default config)

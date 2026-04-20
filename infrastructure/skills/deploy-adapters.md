@@ -14,7 +14,7 @@ description: Download trained LoRA adapters from RunPod or P5 staging, backup cu
 ssh RUNPOD "ls -lh /workspace/output/*/adapter/adapter_model.safetensors 2>/dev/null"
 
 # P5 staging
-ls -lh C:/Users/ELF/Desktop/elf_labs_timeline/trained_adapters/*/adapter_model.safetensors 2>/dev/null
+ls -lh $ADAPTERS_STAGING/*/adapter_model.safetensors 2>/dev/null
 
 # Spark current
 ssh SPARK "ls -lh /home/luna/models/elf-*/adapter_model.safetensors 2>/dev/null"
@@ -23,9 +23,9 @@ ssh SPARK "ls -lh /home/luna/models/elf-*/adapter_model.safetensors 2>/dev/null"
 ### 2. Download from RunPod to P5 (if needed)
 
 ```bash
-mkdir -p "C:/Users/ELF/Desktop/elf_labs_timeline/trained_adapters/elf-{name}-lora"
+mkdir -p "$ADAPTERS_STAGING/elf-{name}-lora"
 scp -P PORT -i ~/.ssh/id_ed25519 -r root@RUNPOD_IP:/workspace/output/elf-{name}-lora/adapter/* \
-  "C:/Users/ELF/Desktop/elf_labs_timeline/trained_adapters/elf-{name}-lora/"
+  "$ADAPTERS_STAGING/elf-{name}-lora/"
 ```
 
 ### 3. Backup current on Spark
