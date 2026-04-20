@@ -101,7 +101,7 @@ Use the Edit tool to make targeted updates. Common updates:
 **3b. Memory File Updates**
 - Update existing memory files with new findings
 - Create new memory files if a new topic area emerged
-- Archive stale memory files to `memory/archive_raptor/` (or appropriate archive)
+- Archive stale memory files to `memory/archive/` (per-domain archive subdirectories as needed)
 - Update MEMORY.md index if files were added/removed
 
 **3c. EverMemOS Writes**

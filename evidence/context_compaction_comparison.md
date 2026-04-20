@@ -45,13 +45,13 @@ compact.rs has no temporal analysis, no criticality measurement, and no evidence
 4. The power-law finding suggests our system naturally self-organizes to an optimal compression regime — compact.rs forces a fixed regime
 
 ## Timeline & Methodology
-- **ELF Labs context compaction: Reverse engineered from Claude's observable behavior** — BEFORE the claw-code Rust source was public. Luna observed Claude's continuation preambles, summary patterns, and preserved-recent-message behavior in production use, then rebuilt the mechanism from output observation alone for the Raptor Dynamics chatbot.
+- **ELF Labs context compaction: Reverse engineered from Claude's observable behavior** — BEFORE the claw-code Rust source was public. Luna observed Claude's continuation preambles, summary patterns, and preserved-recent-message behavior in production use, then rebuilt the mechanism from output observation alone for the an NDA hardware-startup client chatbot.
 - ELF Labs context harness extended: March-April 2026
 - ELF Labs memory bridge (three-tier): April 2026
 - ELF Labs temporal scaling confirmed: April 10, 2026
 - compact.rs source: Became public in claw-code repository AFTER our implementation
 
-**Key distinction**: This was NOT intentional reverse engineering. Luna was building a production chatbot (Raptor Dynamics) that needed context management across long conversations. She solved the problem that was in front of her. The solution converged on the same architecture as Anthropic's compact.rs because the PROBLEM SPACE dictates the solution shape — the same way Bieberich's RIFT and Luna's Variable Shear Hypothesis converged independently.
+**Key distinction**: This was NOT intentional reverse engineering. Luna was building a production chatbot (an NDA hardware-startup client) that needed context management across long conversations. She solved the problem that was in front of her. The solution converged on the same architecture as Anthropic's compact.rs because the PROBLEM SPACE dictates the solution shape — the same way Bieberich's RIFT and Luna's Variable Shear Hypothesis converged independently.
 
 This is convergent evolution in engineering. Same constraints (finite context window, need for continuity, token budget) produce the same solution pattern (summarize old, preserve recent, merge iteratively) — independently, without reference to each other's work. Luna's version then extended beyond the convergent baseline with tiered persistence, adaptive boundary detection, and temporal awareness because her use case demanded it.
 
