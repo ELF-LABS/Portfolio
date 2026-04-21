@@ -54,8 +54,25 @@ The Apr 9–19 sprint produced the first statistically significant pilot data on
 - [`research/cross_domain_synthesis.md`](research/cross_domain_synthesis.md) — Shell 1-2-3 lattice pattern observed across 10 independent literatures, with devil's-advocate critique section.
 
 ### Infrastructure
-- [`infrastructure/skills/deploy-adapters.md`](infrastructure/skills/deploy-adapters.md) — adapter deployment pipeline (download from cloud, back up, deploy, restart, verify).
-- [`infrastructure/runpod_bootstrap.sh`](infrastructure/runpod_bootstrap.sh) + [`infrastructure/train_queue.sh`](infrastructure/train_queue.sh) — one-command cloud GPU training pod setup and queue management.
+
+**Training pipeline** ([`infrastructure/training/`](infrastructure/training/) — see [`TRAINING_PIPELINE.md`](infrastructure/training/TRAINING_PIPELINE.md) for narrative)
+- [`train_baseline_lora.py`](infrastructure/training/train_baseline_lora.py) — QLoRA training script (NF4 + DoRA + LoRA+ + OLoRA init) with `DivergenceTripwireCallback` that aborts the run when loss explodes (caught the Apr 17 pod-1 catastrophic-forgetting incident at step ~105 without operator intervention).
+- [`vast_bootstrap_5090.sh`](infrastructure/training/vast_bootstrap_5090.sh) — proven bootstrap recipe for RTX 5090 spot pods. The four critical fixes (TORCHDYNAMO_DISABLE, TOKENIZERS_PARALLELISM, dataloader_pin_memory, kill compile workers) take step time from 88 s to 18 s.
+- [`start_baseline_train.sh`](infrastructure/training/start_baseline_train.sh) — launcher with env+venv source.
+
+**Multi-component gate** ([`infrastructure/gate/`](infrastructure/gate/) — see [`GATE_DESIGN.md`](infrastructure/gate/GATE_DESIGN.md) for narrative)
+- [`multi_lora_gate.py`](infrastructure/gate/multi_lora_gate.py) — task-routed specialist + pattern-master cross-cut + verdict-combination logic with strict-reachability circuit breaker.
+- [`code_sandbox.py`](infrastructure/gate/code_sandbox.py) — deterministic AST + isolated subprocess execution sandbox for code-task pairs (non-LLM ground truth).
+- [`reasoning_depth_grader.py`](infrastructure/gate/reasoning_depth_grader.py) — schema-versioned 4-component rubric (decomposition, causal_linkage, edge_cases, actionability) + inter-grader agreement check.
+- [`disagreement_entropy.py`](infrastructure/gate/disagreement_entropy.py) — per-cycle Shannon entropy over (specialist, pattern) verdict-pair distribution; surfaces gate-component conflict.
+
+**Self-improvement loop** ([`infrastructure/self_improve/`](infrastructure/self_improve/) — see [`LOOP_DESIGN.md`](infrastructure/self_improve/LOOP_DESIGN.md) for narrative)
+- [`target_curve.py`](infrastructure/self_improve/target_curve.py) — exponential decay setpoint trajectory (the SETPOINT stream of the Black Box).
+- [`blackbox.py`](infrastructure/self_improve/blackbox.py) — per-cycle trace recorder with atomic writes + size-rotated master log; computes `gap_exec` and `gap_model`.
+
+**Cloud + deployment**
+- [`infrastructure/runpod_bootstrap.sh`](infrastructure/runpod_bootstrap.sh) + [`infrastructure/train_queue.sh`](infrastructure/train_queue.sh) — generic cloud GPU training pod setup and queue management (legacy A6000 path, before the 5090 sprint).
+- [`infrastructure/skills/deploy-adapters.md`](infrastructure/skills/deploy-adapters.md) — adapter deployment pipeline (download from cloud, back up, deploy to inference, restart, verify).
 
 ### Open source
 - [PIDForge](https://github.com/ELF-LABS/PIDForge) — Apache 2.0 signal-processing toolkit for FPV flight-controller PID tuning. Rule-based; no LLM.
