@@ -1,4 +1,4 @@
-# ELF Labs — Compositional Multi-LoRA Architecture for Specialist Reasoning Under Compute Constraint
+# ELF Labs — Compositional Multi-LoRA Architecture for Specialist Reasoning
 
 **Emmelina Luna Fugler** | Independent Researcher | [radiantfrequency.xyz](https://radiantfrequency.xyz) | [github.com/ELF-LABS](https://github.com/ELF-LABS)
 
@@ -11,7 +11,13 @@ A 1,500-row pilot study (Apr 9–19, 2026) demonstrates that a compositional mul
 - **Compositional cost on familiar held-out specialist territory:** Δ = −11.46, **p = 0.022** (n = 198, d = 0.327).
 - **Self-improvement loop preserves baseline:** pattern vs. candidate adapter pooled n = 1,097, p = 0.83, d = 0.013 (negligible). Validates the multi-component gate as anti-reward-hacking architecture.
 
-Underpowered but directionally large per-domain results (n small, future-work anchors): **game theory +38pp** (n = 6, d = −1.20 very large), **logic +22pp** (n = 12, d = −0.78 medium-large), **math +3.3pp** (n = 33).
+**⚠️ Future-work anchors — underpowered, do not anchor on these as findings.** Per-domain results with very small n, reserved for powered replication:
+
+- **Game theory:** Δ = +38pp (n = 6, d = −1.20, very large effect)
+- **Logic:** Δ = +22pp (n = 12, d = −0.78, medium-large effect)
+- **Math:** Δ = +3.3pp (n = 33, d = −0.44, small effect)
+
+The effect sizes warrant powered investigation; the sample sizes preclude conclusions. These three domains are the strongest candidates for shaping the next research direction — if the +38pp game-theory result holds at power-adequate n, that is a frontier-relevant compositional-architecture signal.
 
 Total cloud spend for the sprint: **~$8 USD** (RunPod / Vast 5090 spot training); **~$80 total sprint cost** including AI-tool subscriptions and utilities prorated for the 10-day window; on top of owned local hardware.
 
@@ -19,9 +25,11 @@ Full methodology, per-domain results, and known caveats: [`measurements/fellows_
 
 ## What this is
 
-A reinforcement-learning-style self-improvement loop for specialist reasoning, implemented end-to-end on a small-model substrate (Qwen3.5-4B + 7 task-specialist QLoRA adapters), validated through a multi-component anti-Goodhart gate (task-routed specialist + pattern-master cross-cut + deterministic code sandbox + disagreement-entropy monitor), running over persistent tiered memory (event_log → episodes → memcells → foresight) measured to operate at power-law temporal scaling.
+A reinforcement-learning-style self-improvement loop for specialist reasoning, implemented end-to-end on a small-model substrate (Qwen3.5-4B + 7 task-specialist QLoRA adapters).
 
-The Apr 9–19 sprint produced the first statistically significant pilot data on this architecture. The system is designed for the regime where compute is constrained and the open question is *how much architectural composition can substitute for scale*.
+Validated through a multi-component anti-Goodhart gate: task-routed specialist + pattern-master cross-cut + deterministic code sandbox + disagreement-entropy monitor. The whole stack runs over persistent tiered memory (event_log → episodes → memcells → foresight) measured to operate at power-law temporal scaling.
+
+The Apr 9–19 sprint produced the first statistically significant pilot data on this architecture. The open question is *how much architectural composition can substitute for parameter scale*.
 
 ## Architecture
 
