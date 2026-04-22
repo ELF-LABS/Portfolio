@@ -26,6 +26,17 @@ This file documents methodology, raw per-domain results, and the rigorous statis
 - **Pipeline B** — 24 stress-test files split across three regimes (`set_a_provable`, `set_b_cross_domain`, `set_c_multistep`), three independent runs per cell. 1,185 graded rows pooled.
 - Judges: Qwen3.5-35B (local) primary; Groq Llama 3.3 70B and Z.ai GLM-4.7-Flash as cross-family ensemble where rate-limits allowed. Pipeline A cells fell back to single-judge under cloud-judge timeouts; comparison preserved by grading both subjects under identical conditions.
 
+**Inference settings (reproduced for transparency):**
+
+| Component | Temperature | Other |
+|---|---|---|
+| Subjects (`pattern`, `pattern_candidate`, `coven`) | **0.0** (greedy / deterministic) | `max_tokens=1024`, `chat_template_kwargs={"enable_thinking": False}`, no `response_format`. `top_p`/`top_k` left at framework defaults — moot under greedy decoding. Subject path is therefore fully deterministic. |
+| Judge — Qwen3.5-35B (local, primary) | **0.0** | `max_tokens=600`, `enable_thinking=False` (freeform path). |
+| Judge — Groq Llama 3.3 70B | **0.0** | `max_tokens=600`, `response_format={"type":"json_object"}`. |
+| Judge — Z.ai GLM-4.7-Flash | `do_sample=False` | Bypasses temperature/top_p per concept-param docs. `max_tokens=600`, `thinking={"type":"disabled"}`, `response_format={"type":"json_object"}`. |
+
+**Run design:** three independent runs per (subject × set × question_set) cell. Observed σ across runs (0.0–1.0) measures *judge stability* — cloud judges retain minor non-determinism even at these settings, the primary local judge has slight variation across identical re-grades. The subject path is fully deterministic under greedy decoding, so this variance cannot be attributed to subject sampling noise. Multi-run variance is therefore a judge-self-consistency measurement, intentionally.
+
 ---
 
 ## 2. Pipeline B — per-domain results (raw)
