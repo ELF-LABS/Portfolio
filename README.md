@@ -116,3 +116,4 @@ Compute funding from a research fellowship would convert the underpowered per-do
 
 *Emmelina Luna Fugler — Independent Researcher, ELF Labs*
 *Contact: [elf@radiantfrequency.xyz](mailto:elf@radiantfrequency.xyz) · [radiantfrequency.xyz](https://radiantfrequency.xyz)*
+*ORCID: [0009-0009-5281-4421](https://orcid.org/0009-0009-5281-4421)*
