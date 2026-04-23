@@ -106,7 +106,7 @@ Significance is reported via Welch *t*-tests with Cohen's *d* effect sizes; per-
 
 ## About
 
-ELF Labs is a solo research operation in Harlan, Iowa. The thesis: one researcher with sovereign infrastructure, willing to invest meaningful personal money in compute and AI tooling, can produce empirically grounded pilot data on architectures that would conventionally require a team.
+ELF Labs is a solo research operation based in Iowa. The thesis: one researcher with sovereign infrastructure, willing to invest meaningful personal money in compute and AI tooling, can produce empirically grounded pilot data on architectures that would conventionally require a team.
 
 The system runs on owned hardware (3 machines). Cloud compute is used for burst training only. The ~$8 direct cloud spend for the Apr 9–19 pilot sits on top of approximately $120/month in AI-tool subscriptions (Claude Max + Cursor Pro) and ongoing utilities — total ten-day sprint cost ~$80 of personal money. The system trains itself, monitors its own state, and generates its own training data.
 
