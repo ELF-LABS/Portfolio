@@ -1,0 +1,13 @@
+# Normalize line endings across platforms.
+* text=auto eol=lf
+
+# Binaries — do not diff or try to normalize.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.safetensors binary
+*.bin binary
+*.pt binary
+*.pth binary
+*.ckpt binary
