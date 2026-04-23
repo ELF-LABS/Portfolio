@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  python-syntax-smoke:
+    name: Python syntax smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile tracked Python files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t PY_FILES < <(git ls-files '*.py')
+          if [ "${#PY_FILES[@]}" -eq 0 ]; then
+            echo "No tracked Python files; skipping."
+            exit 0
+          fi
+          echo "Compiling ${#PY_FILES[@]} file(s):"
+          printf '  %s\n' "${PY_FILES[@]}"
+          python -m py_compile "${PY_FILES[@]}"
+          echo "All files parsed cleanly."
