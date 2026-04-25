@@ -11,7 +11,9 @@ description: Save the state of the current working session to your memory backen
 
 # sync
 
-End-of-session state saver. At a natural checkpoint, this skill writes a structured summary of what happened in the session to your memory backend so future sessions can pick up the thread. **It does not analyze cross-project connections** — for that, use `cross-pollinate`. For both in one pass, use `sync-pollinate`.
+*End-of-session state save — writes a structured summary of the session to your memory backend so future sessions can pick up the thread.*
+
+This skill **does not analyze cross-project connections** — for that, use `cross-pollinate`. For both in one pass, use `sync-pollinate`.
 
 ## When to use which
 
