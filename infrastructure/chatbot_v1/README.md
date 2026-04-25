@@ -4,6 +4,18 @@ The first production version. Built under hard hardware constraints: a single 8 
 
 This deployment served a specialized use case with confidentiality constraints. The design pattern is published; domain-specific data, knowledge base content, and deployment details remain proprietary.
 
+## Timeline
+
+| Date | Milestone |
+|---|---|
+| Jan 16, 2026 | Engagement start. Mutual NDA executed. Initial scope: web-portal RAG over a domain-specific knowledge base, three-phase deployment plan. |
+| Jan 26, 2026 | **v1 proof-of-concept delivered.** 10 calendar days, 30 hours of work. Llama 3.1 8B via Ollama, RAG pipeline (sentence-transformers + Milvus GPU), Flask web portal, Tailscale VPN access for remote use. Single-user demo on the RTX 2080 (8 GB VRAM) workstation. |
+| Jan 26 – Jan 31, 2026 | v1 acceptance + initial evaluation period. |
+| Feb 1 – Feb 13, 2026 | Continued v1 operation while v2 hardware was provisioned. Additional 30 hours of bridging work (Docker container hardening, knowledge-base loading, post-processing-chain seeding). |
+| Feb 13, 2026 | v1 superseded by v2 in production; v1 architecture preserved as reference and fallback. |
+
+Engagement timeline is verifiable via contractual records (quotes and invoices) held privately and available on verification request.
+
 ## Hardware constraint
 
 | | |

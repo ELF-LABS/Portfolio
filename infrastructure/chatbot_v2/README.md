@@ -4,6 +4,21 @@ The current production version. Same deployment as v1, redesigned around product
 
 The data, knowledge base content, and deployment details remain proprietary. The architecture pattern is published.
 
+## Timeline
+
+| Date | Milestone |
+|---|---|
+| Feb 6, 2026 | v2 upgrade proposal — production-grade hardware (DGX Spark / GB10 Blackwell, 128 GB unified memory) + larger MoE model to address v1's accuracy ceiling on technical-domain queries. |
+| Feb 7 – Feb 12, 2026 | DGX Spark hardware setup. Blackwell kernel adaptation (CUDA 13 / kernel 6.13+). NVIDIA NGC base-image container rebuild. |
+| Feb 13, 2026 | **First production milestone.** 30 hours of work delivered (DGX Spark infrastructure setup, MoE LLM deployment with FP4-class quantization, FalkorDB graph-database integration, RAG-pipeline migration from the v1 stack, end-to-end testing of the new LLM + Milvus + FalkorDB topology). |
+| Feb 13 – Feb 17, 2026 | Newer-LLM deployment, hybrid BM25 + vector retrieval with RRF fusion, cross-encoder rerank stage. |
+| Mar 2026 | Five-stage post-processing chain (citations → reference resolution → image injection → hallucination check → confidentiality filter). Focused-retrieval gate with intent-conditional bypass. Phoenix tracing across embedding / retriever / LLM / chain. |
+| Mar–Apr 2026 | Editorial-triad compositional-validation layer added. Conversation-history depth raised from 2–4 to 20 turns with `context_compressor` for long-session summarization. |
+| Apr 2026 | **98.5 % answer accuracy** measured on a frozen held-out evaluation set via automated test harness. |
+| Apr 2026 – present | Ongoing maintenance, vertical extensions, and incremental architecture improvements. |
+
+Engagement timeline is verifiable via contractual records (quotes and invoices) held privately and available on verification request.
+
 ## Headline result
 
 **98.5 % answer accuracy on a frozen held-out evaluation set** (automated test harness against ground-truth Q/A pairs). The metric is end-to-end — retrieve + generate + post-process, not retrieval-only. Live-traffic accuracy is not claimed; this number tracks a calibration target on a fixed test set, not a guarantee on in-the-wild distribution.
