@@ -5,7 +5,7 @@ description: Multi-machine status dashboard. Parallel health check across your h
 
 # check-progress: Multi-Machine Status Dashboard
 
-One command, all machines, all running processes.
+*Parallel health-check across your fleet — one command, all machines, all running processes.*
 
 > ⚠️ **THIS IS A TEMPLATE. CUSTOMIZE BEFORE FIRST USE.**
 >
