@@ -5,7 +5,7 @@ description: Parallel multi-agent audit for complex multi-file pipelines, follow
 
 # swarm-audit
 
-Parallel agent swarm + single-agent synthesis for interconnection audits on complex multi-file systems. The pattern has consistently surfaced dozens of static bugs in a few minutes where serial smoke-debug would take hours.
+*Parallel multi-agent audit + single-agent synthesis for multi-file systems — surfaces dozens of static bugs in minutes where serial smoke-debug takes hours.*
 
 ## When to use
 
