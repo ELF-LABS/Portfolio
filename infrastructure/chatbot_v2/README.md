@@ -6,7 +6,7 @@
 | **Concept → first production milestone** | 7 days *(Feb 6 → Feb 13, 2026)* |
 | **Architecture buildout** | Feb 13 – Apr 2026 *(hybrid retrieval, cross-encoder rerank, focused-retrieval gate, five-stage post-processing chain, editorial triad)* |
 | **Held-out evaluation accuracy** | 98.5 % *(end-to-end, frozen test set, measured Apr 2026)* |
-| **Stack** | MoE LLM (SGLang) · Milvus · FalkorDB · `ms-marco-MiniLM` cross-encoder · BGE embeddings · Phoenix tracing · static-HTML frontend over REST · ETL pipeline (any DB → embed → index, full-website ingest in <1 hour) |
+| **Stack** | MoE LLM (SGLang, 6 hot-swappable profiles) · Milvus · FalkorDB · `ms-marco-MiniLM` cross-encoder · BGE embeddings · Phoenix tracing · static-HTML frontend over REST · automated self-optimizing ETL pipeline (any DB → embed → index, full-website ingest in <1 hour) · FP8 KV-cache + tuned attention backend |
 | **License footprint** | all open-source |
 
 The redesign that earned its complexity. With the VRAM ceiling lifted, the question shifts from *what gets cut* to *what additional verification layers are load-bearing*. Each architectural component below is dated to when it landed.
@@ -27,7 +27,10 @@ The redesign that earned its complexity. With the VRAM ceiling lifted, the quest
 | Specialized gating | None | **Focused-retrieval gate**, DB-agnostic — routes named-entity queries through whichever backing store the ETL pipeline has indexed |
 | Post-processing | Confidentiality filter + citation cleanup | Five-stage chain: citations → reference resolution → image injection → hallucination check → confidentiality filter, plus output formatting layer (markdown structure, code/quote blocks, sectioning) |
 | Frontend | Flask + SocketIO (WebSocket streaming, server-side state) | **Static HTML over REST** — simpler deployment, CDN-friendly, easier to host, no SocketIO complexity |
-| ETL ingest | Manual chunking + offline embedding per corpus | **Unified pipeline** — any DB or website source → scrape → process → embed → index, full-website ingest reproducibly in **under one hour** |
+| ETL ingest | Manual chunking + offline embedding per corpus | **Automated self-optimizing pipeline** — any DB or website source → scrape → chunk → embed → index, full-website ingest reproducibly in **under one hour**; pipeline measures throughput + quality per stage and tunes itself across runs |
+| Inference steering | Single decode profile, hardcoded params | **Intent-conditional inference steering** (per-intent `max_tokens`, temperature, stop sequences) + system-side **tuning suggestions** surfaced when profile/workload mismatch is detected |
+| SGLang configuration | Single launch config | **6 hot-swappable profiles** tuned per workload (`batch-gen`, `shell-serve`, `deep-think`, `code-gen`, `entity-extract`, `current`) — concurrent-request count, context length, mem-fraction, and reasoning-parser flag tuned per profile |
+| KV-cache + attention | Default | **FP8 (`e4m3`) KV-cache** + Triton attention backend + tuned `mem-fraction-static`, `chunked-prefill-size`, and `max-running-requests` against the unified-memory budget |
 | Tracing | None | [Phoenix](https://github.com/Arize-ai/phoenix) spans on embedding / retriever / LLM / chain |
 
 ## Architecture
@@ -137,7 +140,7 @@ In production this fires on every query mentioning the deployment's named entity
 
 When the query contains a recognized entity identifier from the focused collection, retrieved chunks tagged with that entity receive a `+0.15` score boost in the fusion pass. This is a single-parameter tweak that materially improves entity-specific Q/A accuracy without architectural cost.
 
-### Post-processing chain (five stages, ordered) *(built Mar 2026)*
+### Post-processing chain + output formatting *(built Mar 2026)*
 
 ```python
 # Genericized chain pattern
@@ -153,6 +156,8 @@ def post_process(answer: str, retrieved_chunks: list[dict],
 
 The chain order matters. Citation cleanup before resolution; resolution before image injection (images attach to specific cited chunks); hallucination check before confidentiality filter (otherwise flagged claims could leak terms past the filter).
 
+A second formatting pass sits on top of the chain — ensuring consistent markdown structure, section breaks, code-block fencing, quote-block usage, and inline-link rendering before the answer reaches the static-HTML frontend. The frontend is intentionally simple (no client-side rendering of the chain logic) so all formatting commitments are made server-side and the rendered output is identical regardless of where it's read.
+
 ### Hallucination check
 
 For each declarative claim in the answer, attempts to locate a supporting span in the retrieved chunks. Claims without support are either flagged with a `[verify]` marker or stripped, depending on confidence. Implementation is conservative — false positives are preferable to false negatives in a domain where wrong answers cost trust.
@@ -160,6 +165,61 @@ For each declarative claim in the answer, attempts to locate a supporting span i
 ### Context compressor
 
 Long conversations exceed the LLM's effective context. `context_compressor.py` summarizes earlier turns into compact representations once history depth crosses a configurable threshold. Recent turns stay verbatim; older turns become summaries. Trade-off documented: precise references in older turns can lose granularity, but generation latency stays bounded.
+
+### Inference-layer steering + tuning suggestions *(built Feb–Mar 2026)*
+
+The LLM is not invoked with a single fixed decoding profile. Inference parameters (`max_tokens`, `temperature`, `top_p`, stop sequences, presence penalty) are conditioned on the classified intent of the query. A purchase-intent query gets a different decoding profile than a troubleshooting query than a definitional-lookup query.
+
+A second layer sits above this: when traffic patterns drift (e.g., the average prompt length climbs past a threshold, or generation latency rises against the budget), the system surfaces **tuning suggestions** to the operator — *"current profile is `current` (`max-running-requests=8`, `mem-fraction=0.50`); workload looks like `deep-think` shape; consider `/swap-profile deep-think`."* The suggestion is surfaced, not applied automatically. Profile swaps remain operator-gated because they involve a brief LLM-server restart.
+
+### SGLang profile system *(built Feb–Apr 2026)*
+
+Six hot-swappable launch profiles, each tuned for a workload class:
+
+| Profile | Concurrent requests | Context | mem-fraction | Reasoning parser | Use case |
+|---|---|---|---|---|---|
+| `batch-gen` | 32 | 16 K | 0.80 | off | Throughput-first batch generation |
+| `shell-serve` | 16 | 65 K | 0.42 | on | Interactive multi-shell serving |
+| `deep-think` | 4 | 65 K | 0.60 | on | Long analysis, planning |
+| `code-gen` | 12 | 32 K | 0.50 | on | Code generation + review |
+| `entity-extract` | 24 | 8 K | 0.80 | off | Structured-output graph population |
+| `current` | 8 | 65 K | 0.50 | on | Production baseline |
+
+Profile swap is driven by a small skill (`/swap-profile`) that gracefully drains in-flight requests, restarts the SGLang container with the new launch args, and verifies health before resuming traffic. Each profile ships with documented `(workload, expected throughput, expected p95 latency)` tuples so operator decisions are evidence-grounded.
+
+### KV-cache + attention optimization *(built Feb–Mar 2026)*
+
+The MoE LLM's working set is dominated by the KV cache, not by weights. v2 invests heavily in cache discipline:
+
+- **`kv-cache-dtype=fp8_e4m3`** — KV-cache stored in 8-bit floating-point (4-bit exponent, 3-bit mantissa). Roughly halves cache memory vs. fp16 with negligible quality loss on the workloads tested.
+- **`mem-fraction-static`** tuned per profile — the slice of unified memory reserved for KV cache + activations. Higher for batch-style workloads (`0.80`), lower for interactive (`0.42–0.50`) where the OS / ancillary services need headroom.
+- **`chunked-prefill-size=4096`** — large prompts are broken into 4 K-token chunks for prefill, smoothing memory peaks and enabling overlap with decode.
+- **`max-running-requests`** tuned per profile (4 → 32 across profiles) — the parallel-request slot count, sized against the (KV-cache budget × per-request average ctx) product.
+- **`attention-backend=triton`** — Triton kernels selected for the Blackwell architecture; default backend leaves performance on the table on this hardware.
+- **`disable-cuda-graph`** — required workaround for the specific Spark/Blackwell driver stack in use during the build window; documented because it's surprising.
+
+The combined effect: the same hardware runs ~3× the concurrent traffic the default config would support, with bounded p95 latency.
+
+### Automated self-optimizing ETL pipeline *(built Mar–Apr 2026)*
+
+The ETL is its own subsystem, not a one-shot script. Generic shape:
+
+```
+source (any DB or website)
+    → scraper (rate-limited, polite, resumable)
+    → content extractor (HTML/PDF/markdown → clean text)
+    → chunker (recursive, configurable size + overlap)
+    → embedder (batched, GPU-accelerated)
+    → indexer (vector store + graph store, transactional)
+    → quality gate (sample-and-score, flag low-confidence chunks)
+```
+
+What makes it *automated and self-optimizing*:
+
+- **Per-stage throughput + quality metrics** are recorded for every run.
+- **Across runs**, the pipeline tunes its own parameters — chunk size, batch size, parallelism, scrape rate — by comparing realized throughput against the constraints the previous run hit (timeouts, OOMs, source-side rate limits).
+- **Full-website ingest** (scrape + extract + chunk + embed + index + quality-gate) reproducibly completes in **under one hour** for a typical mid-size domain knowledge base. The previous v1-era manual flow took an evening.
+- The pipeline emits its tuning record so operators can see *why* it chose a given configuration on a given run — observability over auto-magic.
 
 ### Editorial triad pattern (compositional validation)
 
@@ -171,7 +231,7 @@ This is the same anti-Goodhart compositional-validation pattern documented in [`
 
 | Service | Port | Image / Process |
 |---|---|---|
-| Chatbot (Flask + SocketIO) | 5000 | Custom container, `app.py` entry |
+| Chatbot (static HTML + REST API backend) | 5000 | Custom container, `app.py` entry; static frontend served from same origin |
 | LLM serving | 30002 | SGLang container, OpenAI-compatible API |
 | Vector DB (Milvus) | 19530 | Milvus standalone container |
 | Graph DB (FalkorDB) | 6379 (loopback) | FalkorDB container, BM25 index on `content` |
