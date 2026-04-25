@@ -5,6 +5,8 @@ description: Bidirectional cross-pollination engine for new projects. Pulls rele
 
 # research-synthesis: Bidirectional Cross-Pollination Engine
 
+*Pulls relevant patterns and code FROM your existing projects INTO a new one, while pushing new discoveries back OUT — so new work uses the most existing infrastructure possible and old work absorbs new insights.*
+
 Most new projects reinvent things their parent organization already has. This skill prevents that by synthesizing knowledge flow in BOTH directions:
 
 - **INWARD** — what from your existing projects, infrastructure, research, and patterns applies to this new project?
