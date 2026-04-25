@@ -6,7 +6,7 @@
 | **Concept → first production milestone** | 7 days *(Feb 6 → Feb 13, 2026)* |
 | **Architecture buildout** | Feb 13 – Apr 2026 *(hybrid retrieval, cross-encoder rerank, focused-retrieval gate, five-stage post-processing chain, editorial triad)* |
 | **Held-out evaluation accuracy** | 98.5 % *(end-to-end, frozen test set, measured Apr 2026)* |
-| **Stack** | MoE LLM (SGLang) · Milvus · FalkorDB · `ms-marco-MiniLM` cross-encoder · BGE embeddings · Phoenix tracing · Flask + SocketIO |
+| **Stack** | MoE LLM (SGLang) · Milvus · FalkorDB · `ms-marco-MiniLM` cross-encoder · BGE embeddings · Phoenix tracing · static-HTML frontend over REST · ETL pipeline (any DB → embed → index, full-website ingest in <1 hour) |
 | **License footprint** | all open-source |
 
 The redesign that earned its complexity. With the VRAM ceiling lifted, the question shifts from *what gets cut* to *what additional verification layers are load-bearing*. Each architectural component below is dated to when it landed.
@@ -22,9 +22,12 @@ The redesign that earned its complexity. With the VRAM ceiling lifted, the quest
 | Vector store | ChromaDB in-process, RAM mode | [Milvus](https://milvus.io/) standalone server + [FalkorDB](https://github.com/FalkorDB/FalkorDB) graph DB alongside |
 | Retrieval | Vector top-k only | **Hybrid BM25 + vector with RRF fusion**, then cross-encoder rerank |
 | Reranking | None | [`cross-encoder/ms-marco-MiniLM-L-6-v2`](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2) with confidence threshold |
-| Conversation history | 2–4 turns | 20 turns, with relaxed entry-truncation |
-| Specialized gating | None | **Focused-retrieval gate** routes named-entity queries through a dedicated retrieval path |
-| Post-processing | Confidentiality filter + citation cleanup | Five-stage chain: citations → reference resolution → image injection → hallucination check → confidentiality filter |
+| Conversation history | 2–4 turns, hard-truncated | **Sliding-scale context** — depth and entry-detail adapt per turn against the active prompt budget |
+| Session model | In-memory dict keyed by socket ID, lost on restart | **Per-user conversation history**, persistent across sessions, durable in the graph DB |
+| Specialized gating | None | **Focused-retrieval gate**, DB-agnostic — routes named-entity queries through whichever backing store the ETL pipeline has indexed |
+| Post-processing | Confidentiality filter + citation cleanup | Five-stage chain: citations → reference resolution → image injection → hallucination check → confidentiality filter, plus output formatting layer (markdown structure, code/quote blocks, sectioning) |
+| Frontend | Flask + SocketIO (WebSocket streaming, server-side state) | **Static HTML over REST** — simpler deployment, CDN-friendly, easier to host, no SocketIO complexity |
+| ETL ingest | Manual chunking + offline embedding per corpus | **Unified pipeline** — any DB or website source → scrape → process → embed → index, full-website ingest reproducibly in **under one hour** |
 | Tracing | None | [Phoenix](https://github.com/Arize-ai/phoenix) spans on embedding / retriever / LLM / chain |
 
 ## Architecture
