@@ -18,6 +18,7 @@ These skills work fully stand-alone. A couple of them are richer when paired wit
 | [`swarm-audit`](./swarm-audit/SKILL.md) | Parallel multi-agent audit for multi-file pipelines → root-cause synthesis → numbered fix plan with smoke gates. Use before any production cutover. | ❌ |
 | [`research-synthesis`](./research-synthesis/SKILL.md) | Bi-directional cross-pollination when starting a new project — pulls relevant code/patterns/data from your existing projects into the new one, and pushes new discoveries back out. Requires a small project-inventory file you maintain. | ❌ |
 | [`check-progress`](./check-progress/SKILL.md) | Multi-machine status dashboard — parallel health check across your hosts (SSH, Docker, GPU, queues, logs). Template skill; requires filling in your own host list before first use. | ❌ |
+| [`portfolio-fit-review`](./portfolio-fit-review/SKILL.md) | Multi-tier recursive review of any public portfolio repo (Haiku swarm + 4 Sonnet synthesizers + Opus completeness observer with recursive expansion). Outputs honest pros/cons + personalized "where this overlaps with YOUR work" derived from your local CLAUDE.md and settings.json. Defaults to this Portfolio on first run; offers retarget after. For hiring managers, fellowship reviewers, mentors, OSS maintainers, peer collaborators. | ✅ |
 
 ### sync vs cross-pollinate vs sync-pollinate
 
