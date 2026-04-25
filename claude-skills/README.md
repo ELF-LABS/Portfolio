@@ -33,7 +33,7 @@ To uninstall, delete the directory.
 
 ## Optional: EverMemOS integration
 
-A couple of these skills can use a richer semantic-memory layer than plain files. We run [EverMemOS](https://github.com/openMem-org/EverMemOS) — an open-source self-hosted memory system with persistent semantic search, timestamped entries, and cross-session recall.
+A couple of these skills can use a richer semantic-memory layer than plain files. We run [EverMemOS](https://github.com/EverMind-AI/EverMemOS) — an open-source self-hosted memory system with persistent semantic search, timestamped entries, and cross-session recall.
 
 If you want continuous memory across sessions (with search, tagging, and cross-project connections), `sync-pollinate` will offer to walk you through EverMemOS setup on first run. Takes about 20 minutes in Docker. Fully optional — vanilla file mode works great if you don't want another service running.
 
