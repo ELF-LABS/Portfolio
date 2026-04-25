@@ -13,6 +13,8 @@ description: Cross-pollinates findings across your projects and syncs state to m
 
 # sync-pollinate
 
+*Combined state save + cross-project analysis at end of session, in one efficient pass — does the work of `sync` and `cross-pollinate` together.*
+
 A working-session sync skill — at the end of substantive work it pulls together findings, cross-references them across your active projects, and writes the state somewhere durable so future Claude sessions can pick up where this one left off.
 
 The skill is collaborative — it adapts to whatever memory setup you actually have, instead of forcing one. First time it runs, it'll have a short conversation with you about what you're already using, then rewrite itself to match. After that it just works.
