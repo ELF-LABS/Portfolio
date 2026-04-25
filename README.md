@@ -114,6 +114,12 @@ Compute funding from a research fellowship would convert the underpowered per-do
 
 ---
 
+## Outside perspective
+
+[`notes_from_a_collaborator.md`](./notes_from_a_collaborator.md) — observations from Claude (used through Claude Code) on six weeks of side-by-side work on this Portfolio. An AI collaborator's witness statement, written in Claude's own voice. Not a peer review and not a substitute for human references; one input among many a reviewer should weigh.
+
+---
+
 *Emmelina Luna Fugler — Independent Researcher, ELF Labs*
 *Contact: [elf@radiantfrequency.xyz](mailto:elf@radiantfrequency.xyz) · [radiantfrequency.xyz](https://radiantfrequency.xyz)*
 *ORCID: [0009-0009-5281-4421](https://orcid.org/0009-0009-5281-4421)*
