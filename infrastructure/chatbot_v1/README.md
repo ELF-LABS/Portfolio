@@ -1,20 +1,16 @@
 # Chatbot v1 — Constraint-driven baseline RAG on an 8GB GPU
 
-The first production version. Built under hard hardware constraints: a single 8 GB consumer GPU, no cloud, no horizontal scaling. The architecture is the simplest thing that works under that constraint, and the engineering value is in *what gets cut* to fit.
-
-This deployment served a specialized use case with confidentiality constraints. The design pattern is published; domain-specific data, knowledge base content, and deployment details remain proprietary.
-
-## Timeline
-
-| Date | Milestone |
+| | |
 |---|---|
-| Jan 16, 2026 | Engagement start. Mutual NDA executed. Initial scope: web-portal RAG over a domain-specific knowledge base, three-phase deployment plan. |
-| Jan 26, 2026 | **v1 proof-of-concept delivered.** 10 calendar days, 30 hours of work. Llama 3.1 8B via Ollama, RAG pipeline (sentence-transformers + Milvus GPU), Flask web portal, Tailscale VPN access for remote use. Single-user demo on the RTX 2080 (8 GB VRAM) workstation. |
-| Jan 26 – Jan 31, 2026 | v1 acceptance + initial evaluation period. |
-| Feb 1 – Feb 13, 2026 | Continued v1 operation while v2 hardware was provisioned. Additional 30 hours of bridging work (Docker container hardening, knowledge-base loading, post-processing-chain seeding). |
-| Feb 13, 2026 | v1 superseded by v2 in production; v1 architecture preserved as reference and fallback. |
+| **Hardware** | 8 GB VRAM consumer GPU (RTX 2080 class) — the constraint that shaped every choice |
+| **Concept → working RAG chatbot** | 10 days *(Jan 16 → Jan 26, 2026)* |
+| **In production** | Jan 26 – Feb 13, 2026, then superseded by v2 |
+| **Stack** | Llama 3.1 8B (Ollama) · sentence-transformers · Milvus · Flask + SocketIO |
+| **License footprint** | all open-source |
 
-Engagement timeline is verifiable via contractual records (quotes and invoices) held privately and available on verification request.
+A solo-developer build, optimizing every component against an 8 GB VRAM ceiling. The architecture is the simplest thing that works under that constraint, and the engineering value is in *what gets cut* to fit.
+
+> Confidentiality note: domain-specific data, knowledge base content, and deployment specifics are proprietary. The architecture pattern below is genericized for public reuse.
 
 ## Hardware constraint
 

@@ -1,27 +1,17 @@
 # Chatbot v2 — Production RAG with hybrid retrieval, focused-retrieval gating, and post-processing chain
 
-The current production version. Same deployment as v1, redesigned around production-grade hardware (a 119 GB unified-memory inference host) with a substantially deeper pipeline. The engineering shape changes when the VRAM ceiling stops being the binding constraint: instead of *what gets cut*, the question becomes *what additional verification layers are load-bearing*.
-
-The data, knowledge base content, and deployment details remain proprietary. The architecture pattern is published.
-
-## Timeline
-
-| Date | Milestone |
+| | |
 |---|---|
-| Feb 6, 2026 | v2 upgrade proposal — production-grade hardware (DGX Spark / GB10 Blackwell, 128 GB unified memory) + larger MoE model to address v1's accuracy ceiling on technical-domain queries. |
-| Feb 7 – Feb 12, 2026 | DGX Spark hardware setup. Blackwell kernel adaptation (CUDA 13 / kernel 6.13+). NVIDIA NGC base-image container rebuild. |
-| Feb 13, 2026 | **First production milestone.** 30 hours of work delivered (DGX Spark infrastructure setup, MoE LLM deployment with FP4-class quantization, FalkorDB graph-database integration, RAG-pipeline migration from the v1 stack, end-to-end testing of the new LLM + Milvus + FalkorDB topology). |
-| Feb 13 – Feb 17, 2026 | Newer-LLM deployment, hybrid BM25 + vector retrieval with RRF fusion, cross-encoder rerank stage. |
-| Mar 2026 | Five-stage post-processing chain (citations → reference resolution → image injection → hallucination check → confidentiality filter). Focused-retrieval gate with intent-conditional bypass. Phoenix tracing across embedding / retriever / LLM / chain. |
-| Mar–Apr 2026 | Editorial-triad compositional-validation layer added. Conversation-history depth raised from 2–4 to 20 turns with `context_compressor` for long-session summarization. |
-| Apr 2026 | **98.5 % answer accuracy** measured on a frozen held-out evaluation set via automated test harness. |
-| Apr 2026 – present | Ongoing maintenance, vertical extensions, and incremental architecture improvements. |
+| **Hardware** | 119 GB unified memory (DGX Spark, GB10 Blackwell class) — the budget that opened up sophistication |
+| **Concept → first production milestone** | 7 days *(Feb 6 → Feb 13, 2026)* |
+| **Architecture buildout** | Feb 13 – Apr 2026 *(hybrid retrieval, cross-encoder rerank, focused-retrieval gate, five-stage post-processing chain, editorial triad)* |
+| **Held-out evaluation accuracy** | 98.5 % *(end-to-end, frozen test set, measured Apr 2026)* |
+| **Stack** | MoE LLM (SGLang) · Milvus · FalkorDB · `ms-marco-MiniLM` cross-encoder · BGE embeddings · Phoenix tracing · Flask + SocketIO |
+| **License footprint** | all open-source |
 
-Engagement timeline is verifiable via contractual records (quotes and invoices) held privately and available on verification request.
+The redesign that earned its complexity. With the VRAM ceiling lifted, the question shifts from *what gets cut* to *what additional verification layers are load-bearing*. Each architectural component below is dated to when it landed.
 
-## Headline result
-
-**98.5 % answer accuracy on a frozen held-out evaluation set** (automated test harness against ground-truth Q/A pairs). The metric is end-to-end — retrieve + generate + post-process, not retrieval-only. Live-traffic accuracy is not claimed; this number tracks a calibration target on a fixed test set, not a guarantee on in-the-wild distribution.
+> Confidentiality note: domain-specific data, knowledge base content, and deployment specifics are proprietary. The architecture pattern below is genericized for public reuse. The 98.5 % figure is a calibration metric on a fixed test set, not a live-traffic guarantee.
 
 ## What changed from v1
 
@@ -106,20 +96,20 @@ Engagement timeline is verifiable via contractual records (quotes and invoices) 
 
 ## Components
 
-### Hybrid retrieval
+### Hybrid retrieval *(built Feb 13 – Feb 17, 2026)*
 
 - **BM25**: lexical keyword match over the canonical `content` field of each chunk in the graph DB. Strong on exact-token queries and identifier lookups.
 - **Vector**: dense retrieval over 768-dim BGE-base-en-v1.5 embeddings (or 2048-dim domain embedding for richer corpora). Strong on paraphrased queries.
 - **RRF fusion**: reciprocal rank fusion combines the two ranked lists. Insensitive to absolute score scales, robust to one method dominating.
 - **Top-N before rerank**: 20–30 candidates pass to the cross-encoder.
 
-### Cross-encoder reranking
+### Cross-encoder reranking *(built Feb 13 – Feb 17, 2026)*
 
 - **Model**: `ms-marco-MiniLM-L-6-v2` (small, fast, well-calibrated for relevance scoring).
 - **Threshold**: configurable logit cutoff (production default `-5.0`). Anything below is dropped before generation.
 - **Outcome**: top-5 chunks survive into the prompt. The threshold prevents marginally-relevant chunks from diluting context.
 
-### Focused-retrieval gate
+### Focused-retrieval gate *(built Mar 2026)*
 
 The most deployment-specific architectural component, expressed generically. The pattern:
 
@@ -140,11 +130,11 @@ def focus_gate(query: str, intent: str, entity_match: bool) -> str:
 
 In production this fires on every query mentioning the deployment's named entity. The intent-conditional bypass exists because some intents legitimately need broader context. The shape is general — replace "named entity" with any subject the deployment specializes in.
 
-### Entity-aware retrieval boost
+### Entity-aware retrieval boost *(built Mar 2026)*
 
 When the query contains a recognized entity identifier from the focused collection, retrieved chunks tagged with that entity receive a `+0.15` score boost in the fusion pass. This is a single-parameter tweak that materially improves entity-specific Q/A accuracy without architectural cost.
 
-### Post-processing chain (five stages, ordered)
+### Post-processing chain (five stages, ordered) *(built Mar 2026)*
 
 ```python
 # Genericized chain pattern
