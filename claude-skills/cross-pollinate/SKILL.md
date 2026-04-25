@@ -5,7 +5,9 @@ description: Synthesize the current session's findings and cross-apply them acro
 
 # cross-pollinate
 
-Cross-project insight synthesizer. Takes the current session's findings and asks the question that's easy to forget: **where else does this apply?** Outputs a structured map of which other projects each insight touches. Does NOT write state to your memory backend — for that, use `sync` or `sync-pollinate`.
+*Cross-project insight synthesizer — asks "where else does this apply?" for every significant finding in the session and outputs a structured map. Analysis only; does not write state.*
+
+For state-write, use `sync` or `sync-pollinate`.
 
 ## When to use which
 
